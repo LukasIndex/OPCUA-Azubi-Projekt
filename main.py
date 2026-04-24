@@ -1,6 +1,7 @@
 import asyncio
 import config
 from cli import abfrage_wert
+from cli import abfrage_pw
 from opcua_client import OpcUaClient
 
 
@@ -15,7 +16,7 @@ async def main():
         print("Verbindung aufgebaut")
 
         while True:
-            # --- CLI-Abfrage ---
+            
             config.NODE_TO_READ = abfrage_wert()
 
             print("Node:", config.NODE_TO_READ)
