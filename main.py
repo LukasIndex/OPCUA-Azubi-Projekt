@@ -5,12 +5,8 @@ from opcua_client import OpcUaClient
 
 
 async def main():
-    # --- CLI-Abfrage ---
-    config.NODE_TO_READ = abfrage_wert()
-
     print("Starte OPC UA Client")
     print("Endpoint:", config.OPCUA_ENDPOINT)
-    print("Node:", config.NODE_TO_READ)
 
     client = OpcUaClient(config.OPCUA_ENDPOINT)
 
@@ -18,8 +14,18 @@ async def main():
         await client.connect()
         print("Verbindung aufgebaut")
 
-        value = await client.read_node(config.NODE_TO_READ)
-        print(f"Wert gelesen: {value}")
+        while True:
+            # --- CLI-Abfrage ---
+            config.NODE_TO_READ = abfrage_wert()
+
+            print("Node:", config.NODE_TO_READ)
+
+            value = await client.read_node(config.NODE_TO_READ)
+            print(f"Wert gelesen: {value}")
+
+            weiter = input("Nochmal abfragen? (y/n): ").strip().lower()
+            if weiter != 'y':
+                break
 
     except Exception as e:
         print("Fehler:", e)
