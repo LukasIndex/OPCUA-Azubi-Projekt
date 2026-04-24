@@ -5,7 +5,9 @@ from opcua_client import OpcUaClient
 
 
 async def main():
-    # --- CLI-Abfrage ---
+    
+    #---------------------------------------------- Abfrage CLI! --------------------------------------------------
+
     config.NODE_TO_READ = abfrage_wert()
 
     print("Starte OPC UA Client")
