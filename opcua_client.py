@@ -1,8 +1,8 @@
 from asyncua import Client
-from cli import abfrage_pw
+
 
 class OpcUaClient:
-    def __init__(self, endpoint: str, username="operator", password=abfrage_pw):
+    def __init__(self, endpoint: str, username: str, password: str):
         self.client = Client(url=endpoint)
         self.client.set_user(username)
         self.client.set_password(password)
