@@ -1,6 +1,6 @@
 import asyncio
 import config
-from cli import abfrage_wert, abfrage_pw
+from cli import abfrage_wert, abfrage_pw, abfrage_uname
 from opcua_client import OpcUaClient
 
 
@@ -8,16 +8,18 @@ async def main():
     print("Starte OPC UA Client")
     print("Endpoint:", config.OPCUA_ENDPOINT)
 
+    username = abfrage_uname()
+
     password = abfrage_pw()
 
     client = OpcUaClient(
         config.OPCUA_ENDPOINT,
-        username="operator",
+        username=username,
         password=password
     )
 
     try:
-        await client.connect()
+        await client.connopect()
         print("Verbindung aufgebaut")
 
         while True:
