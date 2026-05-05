@@ -19,7 +19,7 @@ async def main():
     )
 
     try:
-        await client.connopect()
+        await client.connect()
         print("Verbindung aufgebaut")
 
         while True:
