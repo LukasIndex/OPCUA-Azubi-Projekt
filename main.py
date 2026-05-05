@@ -1,7 +1,8 @@
 import asyncio
 import config
-from cli import abfrage_wert, abfrage_pw, abfrage_uname
+from cli import abfrage_wert, abfrage_uname
 from opcua_client import OpcUaClient
+import getpass
 
 
 async def main():
@@ -9,14 +10,15 @@ async def main():
     print("Endpoint:", config.OPCUA_ENDPOINT)
 
     username = abfrage_uname()
-
-    password = abfrage_pw()
+    password = getpass.getpass("Gib dein Passwort ein: ")
 
     client = OpcUaClient(
         config.OPCUA_ENDPOINT,
         username=username,
         password=password
     )
+
+    print("Angemeldet als:", username)
 
     try:
         await client.connect()
