@@ -2,7 +2,7 @@ import asyncio
 from asyncua import Client
 
 
-# ✅ Handler für Subscription
+
 class SubscriptionHandler:
     def datachange_notification(self, node, val, data):
         print(f"Neuer Wert empfangen: {val}")
@@ -24,7 +24,7 @@ class OpcUaClient:
         node = self.client.get_node(node_id)
         return await node.read_value()
 
-    # ✅ NEU: Subscribe Funktion
+    
     async def subscribe_node(self, node_id: str):
         handler = SubscriptionHandler()
 
