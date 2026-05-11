@@ -1,4 +1,5 @@
- def abfrage_wert():
+ 
+def abfrage_wert():
     while True:
         wert = input("Abfrage Wert eingeben: ").strip()
         if wert:
