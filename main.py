@@ -33,7 +33,7 @@ async def main():
 
             if modus == "s":
                 await client.subscribe_node(config.NODE_TO_READ)
-                break 
+                break  
 
             else:
                 value = await client.read_node(config.NODE_TO_READ)
