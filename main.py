@@ -28,8 +28,16 @@ async def main():
             config.NODE_TO_READ = abfrage_wert()
             print("Node:", config.NODE_TO_READ)
 
-            value = await client.read_node(config.NODE_TO_READ)
-            print(f"Wert gelesen: {value}")
+            # ✅ Auswahl Read oder Subscribe
+            modus = input("Read oder Subscribe? (r/s): ").strip().lower()
+
+            if modus == "s":
+                await client.subscribe_node(config.NODE_TO_READ)
+                break  # Subscription läuft dauerhaft → raus aus loop
+
+            else:
+                value = await client.read_node(config.NODE_TO_READ)
+                print(f"Wert gelesen: {value}")
 
             weiter = input("Nochmal abfragen? (y/n): ").strip().lower()
             if weiter != "y":
