@@ -36,12 +36,12 @@ class OpcUaClient:
     async def subscribe_node(self, node_id: str):
         handler = SubscriptionHandler()
 
+        print("Subscription gestartet... (STRG+C zum Beenden)")
+
         subscription = await self.client.create_subscription(500, handler)
         node = self.client.get_node(node_id)
 
         await subscription.subscribe_data_change(node)
-
-        print("Subscription gestartet... (STRG+C zum Beenden)")
 
         while True:
             await asyncio.sleep(1)
