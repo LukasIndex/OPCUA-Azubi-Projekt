@@ -15,6 +15,7 @@ async def main():
     parser.add_argument("--node", help="NodeId")
     parser.add_argument("--username", help="Username")
     parser.add_argument("--password", help="Password")
+    parser.add_argument("--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe")
     args = parser.parse_args()
 
     
@@ -31,23 +32,19 @@ async def main():
     else:
         username = abfrage_uname()
 
-   
+  
     if args.password:
         password = args.password
     else:
-        password = getpass.getpass("Gib dein Passwort ein (ENTER = anonym): ")
+        password = getpass.getpass("Gib dein Passwort ein: ")
 
-    
     client = OpcUaClient(
         config.OPCUA_ENDPOINT,
         username=username,
         password=password
     )
 
-    if username:
-        print("Angemeldet als:", username)
-    else:
-        print("Anonymer Zugriff")
+    print("Angemeldet als:", username)
 
     try:
         await client.connect()
@@ -55,7 +52,7 @@ async def main():
 
         while True:
 
-            
+           
             if args.node:
                 config.NODE_TO_READ = args.node
             else:
@@ -63,9 +60,15 @@ async def main():
 
             print("Node:", config.NODE_TO_READ)
 
-            modus = input("Read oder Subscribe? (r/s): ").strip().lower()
+          
+            if args.mode:
+                modus = args.mode
+                print("Modus:", modus)
+            else:
+                modus = input("Read oder Subscribe? (r/s): ").strip().lower()
 
-            if modus == "s":
+           
+            if modus in ["s", "subscribe"]:
                 await client.subscribe_node(config.NODE_TO_READ)
                 break
 
