@@ -11,6 +11,13 @@ def abfrage_wert():
 def abfrage_uname():
     while True:
         wert = input("Benutzername eingeben: ").strip()
+        return wert 
+        
+
+
+def abfrage_server():
+    while True:
+        wert = input("Server Adresse eingeben: ").strip()
         if wert:
             return wert
-        print("Eingabe darf nicht leer sein.")
+        print("Eingabe darf nicht leer sein.")        

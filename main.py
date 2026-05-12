@@ -1,12 +1,14 @@
 import asyncio
 import config
-from cli import abfrage_wert, abfrage_uname
+from cli import abfrage_wert, abfrage_uname, abfrage_server
 from opcua_client import OpcUaClient
 import getpass
 
 
 async def main():
     print("Starte OPC UA Client")
+
+    config.OPCUA_ENDPOINT = abfrage_server()
     print("Endpoint:", config.OPCUA_ENDPOINT)
 
     username = abfrage_uname()

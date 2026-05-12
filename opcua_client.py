@@ -14,6 +14,14 @@ class OpcUaClient:
         self.client.set_user(username)
         self.client.set_password(password)
 
+        
+        if username:
+            self.client.set_user(username)
+
+        if password:
+            self.client.set_password(password)
+
+
     async def connect(self):
         await self.client.connect()
 
