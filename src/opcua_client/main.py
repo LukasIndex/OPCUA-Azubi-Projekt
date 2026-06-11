@@ -1,20 +1,21 @@
 import asyncio
-import config
-from cli import abfrage_wert, abfrage_uname, abfrage_server
-from opcua_client import OpcUaClient
+import opcua_client.config as config
+from opcua_client.cli import abfrage_wert, abfrage_uname, abfrage_server
+from opcua_client.opcua_client import OpcUaClient
 import getpass
 import argparse
 
 
-async def main():
+async def async_main():
     print("Starte OPC UA Client")
+
 
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--server", help="OPC UA Endpoint")
-    parser.add_argument("--node", help="NodeId")
     parser.add_argument("--username", help="Username")
     parser.add_argument("--password", help="Password")
+    parser.add_argument("--node", help="NodeId")
     parser.add_argument("--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe")
     args = parser.parse_args()
 
@@ -44,15 +45,13 @@ async def main():
         password=password
     )
 
-    print("Angemeldet als:", username)
-
     try:
         await client.connect()
         print("Verbindung aufgebaut")
+        print("Angemeldet als:", username)
 
         while True:
 
-           
             if args.node:
                 config.NODE_TO_READ = args.node
             else:
@@ -65,7 +64,7 @@ async def main():
                 modus = args.mode
                 print("Modus:", modus)
             else:
-                modus = input("Read oder Subscribe? (r/s): ").strip().lower()
+                modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
 
            
             if modus in ["s", "subscribe"]:
@@ -76,8 +75,9 @@ async def main():
                 value = await client.read_node(config.NODE_TO_READ)
                 print(f"Wert gelesen: {value}")
 
-            weiter = input("Nochmal abfragen? (y/n): ").strip().lower()
-            if weiter != "y":
+            weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
+
+            if weiter !="y":
                 break
 
     except Exception as e:
@@ -88,5 +88,8 @@ async def main():
         print("Client beendet")
 
 
+def main():
+    asyncio.run(async_main())
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
