@@ -2,6 +2,7 @@ import asyncio
 import getpass
 import argparse
 import opcua_client.config as config
+from rich import print
 #  from opcua_client.console import open_window (Out of Scope)
 from opcua_client.cli import abfrage_wert, abfrage_uname, abfrage_server
 from opcua_client.opcua_client import OpcUaClient
@@ -57,6 +58,12 @@ async def async_main():
         await client.connect()
         print("Verbindung aufgebaut")
         print("Angemeldet als:", username)
+
+        try:
+            machine_name = await client.read_node("ns=0;i=2261")
+            print(f"[blue]Maschinen Bezeichnung: {machine_name}[/blue]")
+        except Exception as e:
+            print(f"Maschinen Bezeichnung nicht lesbar: {e}")
 
         if args.event:
             print("Events Werden Angezeigt:")
