@@ -65,28 +65,29 @@ async def async_main():
         except Exception as e:
             print(f"Maschinen Bezeichnung nicht lesbar: {e}")
 
-        if args.event:
-            print("Events Werden Angezeigt:")
-            while client.subscribe_events():
-                await client.subscribe_events()
-                break
+        while True:
+
+            if args.event:
+                print("Events Werden Angezeigt:")
+                while client.subscribe_events():
+                    await client.subscribe_events()
+                    break
             
 
-        if args.node:
-            config.NODE_TO_READ = args.node
-        else:
-            config.NODE_TO_READ = abfrage_wert()
+            if args.node:
+                config.NODE_TO_READ = args.node
+            else:
+                config.NODE_TO_READ = abfrage_wert()
 
-        print("Node:", config.NODE_TO_READ)
+            print("Node:", config.NODE_TO_READ)
 
           
-        if args.mode:
-            modus = args.mode
-            print("Modus:", modus)
-        else:
-            modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
+            if args.mode:
+                modus = args.mode
+                print("Modus:", modus)
+            else:
+                modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
 
-        while True:
 
             if modus in ["s", "subscribe"]:
                 await client.subscribe_node(config.NODE_TO_READ)
