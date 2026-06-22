@@ -46,8 +46,8 @@ async def async_main():
     if args.password:
         password = args.password
     else:
-        password = getpass.getpass("Gib dein Passwort ein: ")  # password stays hidden via getpass
-
+        password = getpass.getpass("Gib dein Passwort ein: ")  
+        
     client = OpcUaClient(
         config.OPCUA_ENDPOINT,
         username=username,
