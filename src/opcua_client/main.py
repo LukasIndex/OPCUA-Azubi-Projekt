@@ -18,6 +18,7 @@ def parser_cli_arguments():
     parser.add_argument("--event", action="store_true", help="Alarmmeldungen der Maschiene")
     parser.add_argument("--node", help="NodeId")
     parser.add_argument("--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe")
+    parser.add_argument("--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
     args = parser.parse_args()
     return args
 
@@ -65,42 +66,62 @@ async def async_main():
         except Exception as e:
             print(f"Maschinen Bezeichnung nicht lesbar: {e}")
 
-        while True:
+        if not args.interactive and not args.node:
+            raise ValueError("Bitte --node angeben oder --interactive verwenden.")
+        if not args.interactive and not args.mode:
+            raise ValueError("Bitte --mode angeben oder --interactive verwenden.")
 
+        if not args.interactive:
             if args.event:
                 print("Events Werden Angezeigt:")
                 while client.subscribe_events():
                     await client.subscribe_events()
                     break
-            
 
-            if args.node:
-                config.NODE_TO_READ = args.node
-            else:
-                config.NODE_TO_READ = abfrage_wert()
-
+            config.NODE_TO_READ = args.node
             print("Node:", config.NODE_TO_READ)
 
-          
-            if args.mode:
-                modus = args.mode
-                print("Modus:", modus)
-            else:
-                modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
-
+            modus = args.mode
+            print("Modus:", modus)
 
             if modus in ["s", "subscribe"]:
                 await client.subscribe_node(config.NODE_TO_READ)
-                break
-
             else:
                 value = await client.read_node(config.NODE_TO_READ)
                 print(f"Wert gelesen: {value}")
 
-            weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
+        else:
+            while True:
+                if args.event:
+                    print("Events Werden Angezeigt:")
+                    while client.subscribe_events():
+                        await client.subscribe_events()
+                        break
 
-            if weiter !="y":
-                break
+                if args.node:
+                    config.NODE_TO_READ = args.node
+                else:
+                    config.NODE_TO_READ = abfrage_wert()
+
+                print("Node:", config.NODE_TO_READ)
+
+                if args.mode:
+                    modus = args.mode
+                    print("Modus:", modus)
+                else:
+                    modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
+
+                if modus in ["s", "subscribe"]:
+                    await client.subscribe_node(config.NODE_TO_READ)
+                    break
+                else:
+                    value = await client.read_node(config.NODE_TO_READ)
+                    print(f"Wert gelesen: {value}")
+
+                weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
+
+                if weiter != "y":
+                    break
 
     except Exception as e:
         print("Fehler:", e)

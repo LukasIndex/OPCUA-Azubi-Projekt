@@ -5,7 +5,7 @@ from asyncua import Client
 
 class SubscriptionHandler:
     def datachange_notification(self, node, val, data):
-        print(f"Neuer Wert empfangen: {val}")
+        print(f"{val}")
 
 class EventSubscriptionHandler:
     def __init__(self):
