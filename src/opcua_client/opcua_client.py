@@ -52,6 +52,17 @@ class OpcUaClient:
     async def disconnect(self):
         await self.client.disconnect()
 
+    async def read_node(self, node_id: str):
+        node = self.client.get_node(node_id)
+        return await node.read_value()
+
+    async def machine_name(self):
+        try:
+            machine_name = await self.read_node("ns=0;i=2261")  # reads the node with the machine name (need for improvement)
+            print(f"[blue]Maschinen Bezeichnung: {machine_name}[/blue]")
+        except Exception as e:
+            print(f"Maschinen Bezeichnung nicht lesbar: {e}")
+
     async def subscribe_events(self):
         handler = EventSubscriptionHandler()
 
@@ -60,7 +71,7 @@ class OpcUaClient:
 
         subscription = await self.client.create_subscription(500, handler)
 
-        msg_node = self.client.get_node("ns=2;i=18")
+        msg_node = self.client.get_node("ns=2;i=18")  # directly reads the nodes for events (need for improvement)
         sev_node = self.client.get_node("ns=2;i=19")
 
         await subscription.subscribe_data_change(msg_node)
@@ -70,10 +81,6 @@ class OpcUaClient:
 
         while True:
             await asyncio.sleep(1)
-
-    async def read_node(self, node_id: str):
-        node = self.client.get_node(node_id)
-        return await node.read_value()
 
     async def subscribe_node(self, node_id: str):
         handler = SubscriptionHandler()
