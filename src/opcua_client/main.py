@@ -7,11 +7,12 @@ from opcua_client.opcua_client import OpcUaClient
 
 
 async def async_main():  # define async main function
-    print("Starte OPC UA Client")
 
     args = parser_cli_arguments()  # calling the parser to use the cli arguments
-
     
+    if args.verbose:
+        print("Starte OPC UA Client")
+
     if args.server:
         config.OPCUA_ENDPOINT = args.server
     else:
@@ -39,7 +40,8 @@ async def async_main():  # define async main function
 
     async def run_client():
         if args.event:
-            print("Events Werden Angezeigt, STRG C zum beenden")
+            if args.verbose:
+                print("Events Werden Angezeigt, STRG C zum beenden")
             await client.subscribe_events()
 
         if args.node:
@@ -47,7 +49,8 @@ async def async_main():  # define async main function
         else:
             config.NODE_TO_READ = abfrage_wert()
 
-        print("Node:", config.NODE_TO_READ)
+        if args.verbose:
+            print("Node:", config.NODE_TO_READ)
 
         if args.mode:
             modus = args.mode
@@ -55,19 +58,24 @@ async def async_main():  # define async main function
             modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
 
         if modus in ["s", "subscribe"]:
-            print(modus)
+            if args.verbose:
+                print(f"Modus: {modus}")
             await client.subscribe_node(config.NODE_TO_READ)
         else:
-            print(modus)
+            if args.verbose:
+                print(f"Modus: {modus}")
             value = await client.read_node(config.NODE_TO_READ)
-            print(f"Wert gelesen: {value}")
+            if args.verbose:
+                print("Wert gelesen:")
+            print(value)
 
     try:
         await client.connect()
-        if username != None:
-            print("Angemeldet als:", username)
-        else:
-            print("Angemeldet als: Anonym")
+        if args.verbose:
+            if username != None:
+                print("Angemeldet als:", username)
+            else:
+                print("Angemeldet als: Anonym")
 
         if args.identify:
             await client.machine_identifiers()  # calls a fuction for getting the machine identifiers
@@ -92,7 +100,8 @@ async def async_main():  # define async main function
 
     finally:
         await client.disconnect()
-        print("Client beendet")
+        if args.verbose:
+            print("Client beendet")
 
 
 def main():  # main function calls async main function
