@@ -1,4 +1,5 @@
 import asyncio
+import opcua_client.config as config
 from rich import print  # Import rich print for colored cli output
 from asyncua import Client
 
@@ -56,12 +57,13 @@ class OpcUaClient:
         node = self.client.get_node(node_id)
         return await node.read_value()
 
-    async def machine_name(self):
+    async def machine_identifiers(self):
         try:
-            machine_name = await self.read_node("ns=0;i=2261")  # reads the node with the machine name (need for improvement)
-            print(f"[blue]Maschinen Bezeichnung: {machine_name}[/blue]")
+            machine_name = await self.read_node(config.MACHINE_ID)  # reads the node with the machine name
+            build_number = await self.read_node(config.BUILD_NUMBER)
+            print(f"[blue]Maschinen Bezeichnung: {machine_name}, Buildnummer: {build_number} [/blue]")
         except Exception as e:
-            print(f"Maschinen Bezeichnung nicht lesbar: {e}")
+            print(f"Maschinen Identifizierungen nicht lesbar: {e}")
 
     async def subscribe_events(self):
         handler = EventSubscriptionHandler()
@@ -71,8 +73,8 @@ class OpcUaClient:
 
         subscription = await self.client.create_subscription(500, handler)
 
-        msg_node = self.client.get_node("ns=2;i=18")  # directly reads the nodes for events (need for improvement)
-        sev_node = self.client.get_node("ns=2;i=19")
+        msg_node = self.client.get_node(config.EVENT_MESSAGE)  # directly reads the nodes for events
+        sev_node = self.client.get_node(config.EVENT_SEVERITY)
 
         await subscription.subscribe_data_change(msg_node)
         await subscription.subscribe_data_change(sev_node)

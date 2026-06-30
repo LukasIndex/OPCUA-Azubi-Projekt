@@ -12,6 +12,7 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-u","--username", help="Username eingabe")
     parser.add_argument("-p","--password", help="Password eingabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
+    parser.add_argument("--identify", action="store_true", help="Identifizierung der Maschiene")
     parser.add_argument("-e","--event", action="store_true", help="Alarmmeldungen der Maschiene")
     parser.add_argument("-n","--node", help="NodeId")
     parser.add_argument("-m","--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe auswählen (read is fallback)")

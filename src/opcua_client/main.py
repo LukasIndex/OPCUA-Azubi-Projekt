@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import opcua_client.config as config
 from rich import print
@@ -39,7 +40,9 @@ async def async_main():  # define async main function
     try:
         await client.connect()
         print("Angemeldet als:", username)
-        await client.machine_name()  # calls a fuction for getting the machine name
+
+        if args.identify:
+            await client.machine_identifiers()  # calls a fuction for getting the machine name
 
         if not args.interactive and not args.node:
             raise ValueError("Bitte --node angeben oder --interactive verwenden.")
@@ -47,9 +50,7 @@ async def async_main():  # define async main function
         if not args.interactive:
             if args.event:
                 print("Events Werden Angezeigt:")
-                while client.subscribe_events():
-                    await client.subscribe_events()
-                    break
+                await client.subscribe_events()
 
             config.NODE_TO_READ = args.node
             print("Node:", config.NODE_TO_READ)
@@ -70,9 +71,8 @@ async def async_main():  # define async main function
             while True:
                 if args.event:
                     print("Events Werden Angezeigt:")
-                    while client.subscribe_events():
-                        await client.subscribe_events()
-                        break
+                    await client.subscribe_events()
+                    break
 
                 if args.node:
                     config.NODE_TO_READ = args.node
@@ -83,10 +83,6 @@ async def async_main():  # define async main function
 
                 if args.mode:
                     modus = args.mode
-                if modus == None:
-                    print("Modus: Read")
-                elif modus != None:
-                    print("Modus:", modus)
                 else:
                     modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
 
@@ -101,6 +97,9 @@ async def async_main():  # define async main function
 
                 if weiter != "y":
                     break
+
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        sys.exit(0)
 
     except Exception as e:
         print("Fehler:", e)
