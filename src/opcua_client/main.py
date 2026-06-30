@@ -37,61 +37,47 @@ async def async_main():  # define async main function
         password=password
     )
 
+    async def run_client():
+        if args.event:
+            print("Events Werden Angezeigt, STRG C zum beenden")
+            await client.subscribe_events()
+
+        if args.node:
+            config.NODE_TO_READ = args.node
+        else:
+            config.NODE_TO_READ = abfrage_wert()
+
+        print("Node:", config.NODE_TO_READ)
+
+        if args.mode:
+            modus = args.mode
+        else:
+            modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
+
+        if modus in ["s", "subscribe"]:
+            print(modus)
+            await client.subscribe_node(config.NODE_TO_READ)
+        else:
+            print(modus)
+            value = await client.read_node(config.NODE_TO_READ)
+            print(f"Wert gelesen: {value}")
+
     try:
         await client.connect()
-        print("Angemeldet als:", username)
+        if username != None:
+            print("Angemeldet als:", username)
+        else:
+            print("Angemeldet als: Anonym")
 
         if args.identify:
-            await client.machine_identifiers()  # calls a fuction for getting the machine name
-
-        if not args.interactive and not args.node:
-            raise ValueError("Bitte --node angeben oder --interactive verwenden.")
+            await client.machine_identifiers()  # calls a fuction for getting the machine identifiers
 
         if not args.interactive:
-            if args.event:
-                print("Events Werden Angezeigt:")
-                await client.subscribe_events()
-
-            config.NODE_TO_READ = args.node
-            print("Node:", config.NODE_TO_READ)
-
-            modus = args.mode
-            if modus == None:
-                print("Modus: Read")
-            elif modus != None:
-                print("Modus:", modus)
-
-            if modus in ["s", "subscribe"]:
-                await client.subscribe_node(config.NODE_TO_READ)
-            else:
-                value = await client.read_node(config.NODE_TO_READ)
-                print(f"Wert gelesen: {value}")
+            await run_client()
 
         else:
             while True:
-                if args.event:
-                    print("Events Werden Angezeigt:")
-                    await client.subscribe_events()
-                    break
-
-                if args.node:
-                    config.NODE_TO_READ = args.node
-                else:
-                    config.NODE_TO_READ = abfrage_wert()
-
-                print("Node:", config.NODE_TO_READ)
-
-                if args.mode:
-                    modus = args.mode
-                else:
-                    modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
-
-                if modus in ["s", "subscribe"]:
-                    await client.subscribe_node(config.NODE_TO_READ)
-                    break
-                else:
-                    value = await client.read_node(config.NODE_TO_READ)
-                    print(f"Wert gelesen: {value}")
+                await run_client()
 
                 weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
 

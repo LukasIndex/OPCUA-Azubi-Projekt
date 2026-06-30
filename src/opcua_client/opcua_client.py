@@ -68,7 +68,6 @@ class OpcUaClient:
     async def subscribe_events(self):
         handler = EventSubscriptionHandler()
 
-        print("Event Subscription startet...")
         await asyncio.sleep(0.3)
 
         subscription = await self.client.create_subscription(500, handler)
@@ -79,23 +78,18 @@ class OpcUaClient:
         await subscription.subscribe_data_change(msg_node)
         await subscription.subscribe_data_change(sev_node)
 
-        print("Events laufen... (STRG+C zum Beenden)")
-
         while True:
             await asyncio.sleep(1)
 
     async def subscribe_node(self, node_id: str):
         handler = SubscriptionHandler()
 
-        print("Subscription startet gleich...")
         await asyncio.sleep(0.3)
 
         subscription = await self.client.create_subscription(500, handler)
         node = self.client.get_node(node_id)
 
         await subscription.subscribe_data_change(node)
-
-        print("Subscription läuft... (STRG+C zum Beenden)")
 
         while True:
             await asyncio.sleep(1)
