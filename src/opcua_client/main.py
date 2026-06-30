@@ -1,4 +1,5 @@
 import sys
+import logging
 import asyncio
 import opcua_client.config as config
 from rich import print
@@ -9,6 +10,9 @@ from opcua_client.opcua_client import OpcUaClient
 async def async_main():  # define async main function
 
     args = parser_cli_arguments()  # calling the parser to use the cli arguments
+
+    if not args.verbose:
+        logging.getLogger("asyncua").setLevel(logging.CRITICAL)
     
     if args.verbose:
         print("Starte OPC UA Client")
