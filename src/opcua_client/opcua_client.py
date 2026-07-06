@@ -2,6 +2,7 @@ import asyncio
 import opcua_client.config as config
 from asyncua import Client
 from rich import print  # Import rich print for colored cli output
+from opcua_client.cli import parser_cli_arguments
 
 
 class SubscriptionHandler:
@@ -59,6 +60,7 @@ class OpcUaClient:
             print(f"Maschinen Identifizierungen nicht lesbar: {e}")
 
     async def subscribe_events(self):
+        args = parser_cli_arguments()
         handler = EventSubscriptionHandler()
         await asyncio.sleep(0.3)
 
@@ -66,9 +68,19 @@ class OpcUaClient:
         event_node = self.client.get_node(config.EVENT_NODE)
         await subscription.subscribe_events(event_node)
 
-        await asyncio.Event().wait()
+        if  not args.interactive:
+            await asyncio.Event().wait()
+        else:
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                if args.verbose:
+                    print("\n[yellow]Event Subscription wird beendet[/yellow]")
+            finally:
+                await subscription.delete()
 
     async def subscribe_node(self, node_id: str):
+        args = parser_cli_arguments()
         handler = SubscriptionHandler()
         await asyncio.sleep(0.3)
 
@@ -76,4 +88,13 @@ class OpcUaClient:
         node = self.client.get_node(node_id)
         await subscription.subscribe_data_change(node)
 
-        await asyncio.Event().wait()
+        if  not args.interactive:
+            await asyncio.Event().wait()
+        else:
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                if args.verbose:
+                    print("\n[yellow]Node Subscription wird beendet[/yellow]")
+            finally:
+                await subscription.delete()

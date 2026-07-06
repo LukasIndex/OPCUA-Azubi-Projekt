@@ -22,7 +22,8 @@ async def async_main():  # define async main function
     else:
         config.OPCUA_ENDPOINT = abfrage_server()
 
-    # print("Endpoint:", config.OPCUA_ENDPOINT)  # prints the server adress of the opcua endpoint
+    if args.verbose:
+        print("Endpoint:", config.OPCUA_ENDPOINT)  # prints the server adress of the opcua endpoint
 
    
     if args.username:
@@ -43,35 +44,48 @@ async def async_main():  # define async main function
     )
 
     async def run_client():
-        if args.event:
-            if args.verbose:
-                print("Events Werden Angezeigt, STRG C zum beenden")
-            await client.subscribe_events()
+            if args.event:
+                if args.verbose:
+                    print("Events Werden Angezeigt, STRG C zum beenden")
+                await client.subscribe_events()
+            elif not args.event and not args.node and not args.mode:
+                action = input("Event oder Node abfragen? (e/N): ").strip().lower()
+                if action == "e":
+                    if args.verbose:
+                        print("Events Werden Angezeigt, STRG C zum beenden")
+                    await client.subscribe_events()
+            else:
+                if args.node:
+                    config.NODE_TO_READ = args.node
+                else:
+                    config.NODE_TO_READ = abfrage_wert()
+                if args.verbose:
+                        print("Node:", config.NODE_TO_READ)
+                if args.mode:
+                    modus = args.mode
+                else:
+                    modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
 
-        if args.node:
-            config.NODE_TO_READ = args.node
-        else:
-            config.NODE_TO_READ = abfrage_wert()
+                if modus in ["s", "subscribe"]:
+                    if args.verbose:
+                        print(f"Modus: {modus}")
+                    await client.subscribe_node(config.NODE_TO_READ)
+                else:
+                    if args.verbose:
+                        print(f"Modus: {modus}")
+                    value = await client.read_node(config.NODE_TO_READ)
+                    if args.verbose:
+                        print("Wert gelesen:")
+                    print(value)
 
-        if args.verbose:
-            print("Node:", config.NODE_TO_READ)
+    async def while_client():
+        while True:
+            await run_client()
+            weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
 
-        if args.mode:
-            modus = args.mode
-        else:
-            modus = input("Read oder Subscribe? (R/s): ").strip().lower()  # R in caps to visualize "pre select"
-
-        if modus in ["s", "subscribe"]:
-            if args.verbose:
-                print(f"Modus: {modus}")
-            await client.subscribe_node(config.NODE_TO_READ)
-        else:
-            if args.verbose:
-                print(f"Modus: {modus}")
-            value = await client.read_node(config.NODE_TO_READ)
-            if args.verbose:
-                print("Wert gelesen:")
-            print(value)
+            if weiter != "y":
+                await client.disconnect()
+                break
 
     try:
         await client.connect()
@@ -88,13 +102,7 @@ async def async_main():  # define async main function
             await run_client()
 
         else:
-            while True:
-                await run_client()
-
-                weiter = input("Nochmal abfragen? (y/N): ").strip().lower()  # N in caps to visualize "pre select"
-
-                if weiter != "y":
-                    break
+            await while_client()
 
     except (KeyboardInterrupt, asyncio.CancelledError):
         sys.exit(0)
