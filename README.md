@@ -99,6 +99,27 @@ opcua-client --server opc.tcp://localhost:4840 --node "ns=2;s=Simulator/Trigonom
 opcua-client --server opc.tcp://localhost:4840 --node "ns=2;s=Simulator/Trigonometry/SineValue" --username operator --password operator123 --mode subscribe
 ```
 
+#### Mit ausführlicher Ausgabe (Verbose-Modus)
+
+```bash
+opcua-client --server opc.tcp://localhost:4840 --node "ns=2;s=Simulator/Demo/GroupA/ExampleNode" --mode read --verbose
+```
+
+Die Verbose-Option zeigt detaillierte Informationen an:
+- Den OPC UA Endpoint
+- Die NodeId
+- Den gewählten Modus
+- Verbindungsstatus
+- Debug-Informationen
+
+#### Maschinenidentifikation anzeigen
+
+```bash
+opcua-client --server opc.tcp://localhost:4840 --identify --verbose
+```
+
+Dies zeigt die vom OPC UA Server bereitgestellte Maschinenbezeichnung an.
+
 #### Events anzeigen
 
 ```bash
@@ -107,23 +128,39 @@ opcua-client --server opc.tcp://localhost:4840 --event --interactive
 
 ## Parameterübersicht
 
-- -s, --server → OPC UA Endpoint
-- -u, --username → Benutzername
-- -p, --password → Passwort
-- -i, --interactive → Aktiviert interaktiven Modus
-- -e, --event → Aktiviert Event-Subscriptions
-- -n, --node → NodeId
-- -m, --mode → read oder subscribe (read ist Fallback)
+### Grundlegende Parameter
+
+- `-s, --server` → OPC UA Endpoint (z.B. opc.tcp://localhost:4840)
+- `-u, --username` → Benutzername für die Authentifizierung
+- `-p, --password` → Passwort für die Authentifizierung
+- `-n, --node` → NodeId zum Auslesen oder Abonnieren (z.B. ns=2;s=Simulator/Trigonometry/SineValue)
+
+### Betriebsmodi
+
+- `-i, --interactive` → Aktiviert den interaktiven Modus mit Eingabeaufforderungen für alle Parameter
+- `-e, --event` → Aktiviert Event-Subscriptions zur Anzeige von Alarm- und Statusmeldungen
+- `-ID, --identify` → Zeigt die Maschinenbezeichnung vom OPC UA Server an
+- `-m, --mode` → Wählt den Betriebsmodus: `read` (Einmalige Abfrage) oder `subscribe` (Kontinuierliche Überwachung). Fallback ist `read`
+
+### Ausgabeoptionen
+
+- `-v, --verbose` → Aktiviert ausführliche Ausgabe mit Debug-Informationen und detaillierten Statusmeldungen
 
 ## Beispielausgaben
 
-### Read
+### Read (Standard-Modus)
+
+```text
+Wert gelesen: 3.27
+```
+
+### Read (Mit Verbose-Ausgabe)
 
 ```text
 Starte OPC UA Client
-Angemeldet als: admin
-Maschinen Bezeichnung: DemoServer
+Endpoint: opc.tcp://localhost:4840
 Node: ns=2;s=Simulator/Demo/GroupA/ExampleNode
+Modus: read
 Wert gelesen: 3.27
 ```
 
@@ -139,12 +176,48 @@ Subscription läuft... (STRG+C zum Beenden)
 1.45
 ```
 
+### Subscribe (Mit Verbose-Ausgabe)
+
+```text
+Starte OPC UA Client
+Endpoint: opc.tcp://localhost:4840
+Node: ns=2;s=Simulator/Trigonometry/SineValue
+Modus: subscribe
+Subscription startet gleich...
+Subscription läuft... (STRG+C zum Beenden)
+0.12
+0.78
+1.45
+```
+
 ### Events
 
 ```text
 Event Subscription startet...
 Events laufen... (STRG+C zum Beenden)
 Event: Alarm ausgelöst | Severity: 800
+Event: Status Update | Severity: 200
+```
+
+### Interaktiver Modus mit Menü
+
+```text
+Starte OPC UA Client
+Server Adresse eingeben: opc.tcp://localhost:4840
+Benutzername eingeben (ENTER = anonym): 
+Gib dein Passwort ein:
+Event oder Node abfragen? (e/N): N
+Abfrage Wert eingeben: ns=2;s=Simulator/Trigonometry/SineValue
+Read oder Subscribe? (R/s): s
+Starte OPC UA Client
+Modus: subscribe
+Subscription läuft... (STRG+C zum Beenden)
+0.45
+0.89
+1.23
+Nochmal abfragen? (y/N) oder neustarten (r): y
+Event oder Node abfragen? (e/N): e
+Event Subscription startet...
 ```
 
 ## Projektstruktur
@@ -172,7 +245,116 @@ oder bei installierter Paketdefinition:
 pip install -e .
 ```
 
+## Erweiterte Funktionen
+
+### Verbose-Modus (Detaillierte Ausgabe)
+
+Der Verbose-Modus aktiviert sich mit der `-v` oder `--verbose` Option und bietet:
+
+- **Detaillierte Statusmeldungen**: Zeigt jeden Schritt der Verbindung und Abfrage an
+- **Debug-Informationen**: Erweiterte Logging-Informationen von asyncua werden angezeigt (normalerweise nur bei Fehlern)
+- **Verbindungsdetails**: Der genaue OPC UA Endpoint wird angezeigt
+- **Parameter-Bestätigung**: Node, Modus und andere Parameter werden vor der Ausführung angezeigt
+
+**Beispiel:**
+```bash
+opcua-client --server opc.tcp://localhost:4840 --node "ns=2;s=Simulator/Demo/GroupA/ExampleNode" --mode read --verbose
+```
+
+### Interaktives Menü
+
+Wenn das Programm ohne spezifische Parameter gestartet wird oder mit `--interactive`, bietet es ein interaktives Menü:
+
+1. **Wahl zwischen Events oder Node-Abfrage**
+   ```
+   Event oder Node abfragen? (e/N):
+   ```
+
+2. **Mehrfach-Abfragen**
+   Nach jeder Operation kann der Benutzer:
+   - `y` eingeben → Eine neue Abfrage durchführen
+   - `r` eingeben → Das Programm neu starten (alle Parameter zurücksetzen)
+   - Beliebig anderes / Enter → Beenden
+
+Diese Funktionalität ermöglicht kontinuierliche Tests und Debugging ohne das Programm neu zu starten.
+
+### Maschinenidentifikation
+
+Mit der `--identify` Option kann die Maschinenbezeichnung des OPC UA Servers abgerufen werden:
+
+```bash
+opcua-client --server opc.tcp://localhost:4840 --identify --verbose
+```
+
+Dies ist besonders nützlich, um zu überprüfen, ob die richtige Maschine angesprochen wird.
+
+### Logging-Kontrolle
+
+- **Ohne Verbose-Modus**: Nur kritische Fehler von asyncua werden angezeigt
+- **Mit Verbose-Modus**: Vollständige Debug-Ausgaben von asyncua werden aktiviert
+
+Dies vereinfacht die Fehlersuche erheblich.
+
+## Praxisbeispiele
+
+### Szenario 1: Schnelle Abfrage eines Wertes
+
+```bash
+opcua-client --server opc.tcp://192.168.1.100:4840 --node "ns=2;s=Temperature" --mode read
+```
+
+**Ausgabe:**
+```
+25.5
+```
+
+### Szenario 2: Debugging mit ausführlicher Ausgabe
+
+```bash
+opcua-client --server opc.tcp://localhost:4840 --node "ns=2;s=Simulator/Demo/GroupA/ExampleNode" --verbose
+```
+
+**Ausgabe:**
+```
+Starte OPC UA Client
+Endpoint: opc.tcp://localhost:4840
+Node: ns=2;s=Simulator/Demo/GroupA/ExampleNode
+Modus: read
+Wert gelesen: 3.27
+```
+
+### Szenario 3: Kontinuierliche Überwachung mit automatischer Authentifizierung
+
+```bash
+opcua-client --server opc.tcp://192.168.1.100:4840 --node "ns=2;s=ProcessValue" --username admin --password pass123 --mode subscribe --verbose
+```
+
+### Szenario 4: Interaktives Testing auf dem Revolution Pi
+
+```bash
+opcua-client --interactive --verbose
+```
+
+Hier wird der Benutzer systematisch durch alle Eingaben geführt und kann mehrfach abfragen, ohne das Programm neu zu starten.
+
+### Szenario 5: Event-Monitoring mit Detailausgabe
+
+```bash
+opcua-client --server opc.tcp://localhost:4840 --event --verbose
+```
+
+Dies zeigt alle Alarm- und Statusereignisse mit vollständigen Debug-Informationen an.
+
+### Szenario 6: Maschinenüberprüfung vor Betrieb
+
+```bash
+opcua-client --server opc.tcp://192.168.1.100:4840 --identify --verbose
+```
+
+Überprüft, ob die richtige Maschine angesprochen wird, bevor weitere Operationen durchgeführt werden.
+
 ## Erweiterungsmöglichkeiten
+
 Das Projekt kann erweitert werden um:
 
 - gleichzeitiges Abonnieren mehrerer Nodes
@@ -180,6 +362,9 @@ Das Projekt kann erweitert werden um:
 - automatische Wiederverbindung bei Verbindungsverlust
 - grafische Darstellung von Messwerten
 - Komfortfunktionen wie Node-Auswahlmenüs oder Konfigurationsdateien
+- Caching von häufig verwendeten NodeIds
+- Export von Event-Logs in strukturierte Formate
+- REST-API für externe Anwendungen
 
 ## Zusammenfassung
 Dieses Projekt bietet einen einfachen und flexiblen Einstieg in die Nutzung von OPC UA mit Python. Es kombiniert eine intuitive Kommandozeilensteuerung mit Funktionen wie Read, Subscribe und Event-Monitoring und eignet sich sowohl für Tests, Debugging und Schulungszwecke als auch für den Einsatz auf Embedded-Systemen.
