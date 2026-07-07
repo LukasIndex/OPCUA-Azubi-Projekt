@@ -61,7 +61,6 @@ pip install -e .
 ## Nutzung
 
 ### Interaktiver Modus
-Das Programm kann interaktiv gestartet werden und fragt alle nötigen Eingaben ab:
 
 ```bash
 opcua-client --interactive
