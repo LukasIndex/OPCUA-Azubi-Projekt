@@ -14,8 +14,8 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-v","--verbose", action="store_true", help="Großzügige ausgabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
     parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschiene")
-    parser.add_argument("-e","--event", action="store_true", help="Alarmmeldungen der Maschiene")
-    parser.add_argument("-n","--node", help="NodeId")
+    parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' works somehow lol
+    parser.add_argument("-n","--node", help='NODE angeben: "ns=X;i=Y"')
     parser.add_argument("-m","--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe auswählen (read is fallback)")
     args = parser.parse_args()
     return args
@@ -38,8 +38,14 @@ def abfrage_password():  # waits for password input and returnes it
         wert = getpass.getpass("Gib dein Passwort ein: ")  # getpass hides password while typing
         return wert
     
+def abfrage_event():  # 3. waits for event node input and returnes it
+    while True:
+        event = input("Event Node eingeben: ").strip()
+        if event:
+            return event
+        print("Eingabe darf nicht leer sein.")   
         
-def abfrage_wert():  # 3. waits for node request from user
+def abfrage_wert():  # 4. waits for node input from user and returnes it
     while True:
         wert = input("Abfrage Wert eingeben: ").strip()
         if wert:

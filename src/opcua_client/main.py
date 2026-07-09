@@ -3,7 +3,7 @@ import logging
 import asyncio
 import opcua_client.config as config
 from rich import print
-from opcua_client.cli import parser_cli_arguments, abfrage_wert, abfrage_uname, abfrage_password, abfrage_server
+from opcua_client.cli import parser_cli_arguments, abfrage_server, abfrage_uname, abfrage_password, abfrage_event, abfrage_wert
 from opcua_client.opcua_client import OpcUaClient
 
 
@@ -70,12 +70,17 @@ async def async_main():  # define async main function
 
     async def run_client():
         if args.event:
+            config.EVENT_NODE = args.event
             if args.verbose:
                 print("Events Werden Angezeigt, STRG C zum beenden")
             await client.subscribe_events()
         elif not args.event and not args.node and not args.mode:
             action = input("Event oder Node abfragen? (e/N): ").strip().lower()
             if action == "e":
+                if args.event:
+                    config.EVENT_NODE = args.event
+                else:
+                    config.EVENT_NODE = abfrage_event()
                 if args.verbose:
                     print("Events Werden Angezeigt, STRG C zum beenden")
                 await client.subscribe_events()
@@ -86,7 +91,15 @@ async def async_main():  # define async main function
 
     async def while_client():
         while True:
-            await run_client()
+            try:
+                await run_client()
+            except KeyboardInterrupt:
+                if client.active_subscription:
+                    try:
+                        await client.active_subscription.delete()
+                        client.active_subscription = None
+                    except Exception:
+                        pass
             weiter = input("Nochmal abfragen? (y/N) oder neustarten (r): ").strip().lower()  # N in caps to visualize "pre select"
             if weiter == "r":
                 args.event = None
@@ -116,14 +129,25 @@ async def async_main():  # define async main function
         else:
             await while_client()
 
-    except (KeyboardInterrupt, asyncio.CancelledError):
-        sys.exit(0)
-
+    except KeyboardInterrupt:
+        if args.verbose:
+            print("Beendet durch Keyboard Interrupt")
+    except asyncio.CancelledError:
+        if client.active_subscription:
+            try:
+                await client.active_subscription.delete()
+                client.active_subscription = None
+            except Exception:
+                pass
     except Exception as e:
         print("Fehler:", e)
 
     finally:
-        await client.disconnect()
+        try:
+            await asyncio.wait_for(client.disconnect(), timeout=1.5)
+        except Exception:
+            pass
+
         if args.verbose:
             print("Client beendet")
 

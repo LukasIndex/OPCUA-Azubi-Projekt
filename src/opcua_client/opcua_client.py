@@ -33,6 +33,7 @@ class EventSubscriptionHandler:
 class OpcUaClient:
     def __init__(self, endpoint: str, username: str, password: str):
         self.client = Client(url=endpoint)
+        self.active_subscription = None
 
        
         if username:
@@ -64,37 +65,45 @@ class OpcUaClient:
         handler = EventSubscriptionHandler()
         await asyncio.sleep(0.3)
 
-        subscription = await self.client.create_subscription(500, handler)
+        self.active_subscription = await self.client.create_subscription(500, handler)
         event_node = self.client.get_node(config.EVENT_NODE)
-        await subscription.subscribe_events(event_node)
+        await self.active_subscription.subscribe_events(event_node)
 
         if  not args.interactive:
             await asyncio.Event().wait()
         else:
             try:
                 await asyncio.Event().wait()
-            except asyncio.CancelledError:
+            except (asyncio.CancelledError, KeyboardInterrupt):
                 if args.verbose:
                     print("\n[yellow]Event Subscription wird beendet[/yellow]")
             finally:
-                await subscription.delete()
+                if self.active_subscription:
+                    if args.verbose:
+                        print("Subscription Deleted")
+                    await self.active_subscription.delete()
+                    self.active_subscription = None
 
     async def subscribe_node(self, node_id: str):
         args = parser_cli_arguments()
         handler = SubscriptionHandler()
         await asyncio.sleep(0.3)
 
-        subscription = await self.client.create_subscription(500, handler)
+        self.active_subscription = await self.client.create_subscription(500, handler)
         node = self.client.get_node(node_id)
-        await subscription.subscribe_data_change(node)
+        await self.active_subscription.subscribe_data_change(node)
 
         if  not args.interactive:
             await asyncio.Event().wait()
         else:
             try:
                 await asyncio.Event().wait()
-            except asyncio.CancelledError:
+            except (asyncio.CancelledError, KeyboardInterrupt):
                 if args.verbose:
                     print("\n[yellow]Node Subscription wird beendet[/yellow]")
             finally:
-                await subscription.delete()
+                if self.active_subscription:
+                    if args.verbose:
+                        print("Subscription Deleted")
+                    await self.active_subscription.delete()
+                    self.active_subscription = None

@@ -150,7 +150,7 @@ opcua-client --server opc.tcp://localhost:4840 --event --interactive
 ### Read (Standard-Modus)
 
 ```text
-Wert gelesen: 3.27
+3.27
 ```
 
 ### Read (Mit Verbose-Ausgabe)
@@ -160,7 +160,7 @@ Starte OPC UA Client
 Endpoint: opc.tcp://localhost:4840
 Node: ns=2;s=Simulator/Demo/GroupA/ExampleNode
 Modus: read
-Wert gelesen: 3.27
+3.27
 ```
 
 ### Subscribe
