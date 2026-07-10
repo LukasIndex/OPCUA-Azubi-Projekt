@@ -58,7 +58,7 @@ async def async_main():  # define async main function
         if modus in ["s", "subscribe"]:
             if args.verbose:
                 print(f"Modus: {modus}")
-            await client.subscribe_node(config.NODE_TO_READ)
+            await await_subscription("subscribe_node")
         else:
             if args.verbose:
                 print(f"Modus: {modus}")
@@ -67,13 +67,29 @@ async def async_main():  # define async main function
                 print("Wert gelesen:")
             print(value)
 
+    async def await_subscription(X):
+        X = getattr(client, X)
+        subscription = await X()
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except (KeyboardInterrupt, asyncio.CancelledError):
+            print("abbruch durch key")
+            if subscription:
+                try:
+                    await subscription.delete()
+                except Exception:
+                    pass
+            if not args.interactive:
+                raise KeyboardInterrupt
+
 
     async def run_client():
         if args.event:
             config.EVENT_NODE = args.event
             if args.verbose:
                 print("Events Werden Angezeigt, STRG C zum beenden")
-            await client.subscribe_events()
+            await await_subscription("subscribe_events")
         elif not args.event and not args.node and not args.mode:
             action = input("Event oder Node abfragen? (e/N): ").strip().lower()
             if action == "e":
@@ -83,7 +99,7 @@ async def async_main():  # define async main function
                     config.EVENT_NODE = abfrage_event()
                 if args.verbose:
                     print("Events Werden Angezeigt, STRG C zum beenden")
-                await client.subscribe_events()
+                await await_subscription("subscribe_events")
             else:
                 await node_client()
         else:
@@ -103,6 +119,7 @@ async def async_main():  # define async main function
             weiter = input("Nochmal abfragen? (y/N) oder neustarten (r): ").strip().lower()  # N in caps to visualize "pre select"
             if weiter == "r":
                 args.event = None
+                config.EVENT_NODE = None
                 config.NODE_TO_READ = None
                 args.node = None
                 args.mode = None
@@ -153,7 +170,10 @@ async def async_main():  # define async main function
 
 
 def main():  # main function calls async main function
-    asyncio.run(async_main())
+    try:
+        asyncio.run(async_main())
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

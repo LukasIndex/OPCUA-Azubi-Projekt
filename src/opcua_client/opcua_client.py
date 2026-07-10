@@ -2,8 +2,6 @@ import asyncio
 import opcua_client.config as config
 from asyncua import Client
 from rich import print  # Import rich print for colored cli output
-from opcua_client.cli import parser_cli_arguments
-
 
 class SubscriptionHandler:
     def datachange_notification(self, node, val, data):
@@ -61,7 +59,6 @@ class OpcUaClient:
             print(f"Maschinen Identifizierungen nicht lesbar: {e}")
 
     async def subscribe_events(self):
-        args = parser_cli_arguments()
         handler = EventSubscriptionHandler()
         await asyncio.sleep(0.3)
 
@@ -69,41 +66,10 @@ class OpcUaClient:
         event_node = self.client.get_node(config.EVENT_NODE)
         await self.active_subscription.subscribe_events(event_node)
 
-        if  not args.interactive:
-            await asyncio.Event().wait()
-        else:
-            try:
-                await asyncio.Event().wait()
-            except (asyncio.CancelledError, KeyboardInterrupt):
-                if args.verbose:
-                    print("\n[yellow]Event Subscription wird beendet[/yellow]")
-            finally:
-                if self.active_subscription:
-                    if args.verbose:
-                        print("Subscription Deleted")
-                    await self.active_subscription.delete()
-                    self.active_subscription = None
-
-    async def subscribe_node(self, node_id: str):
-        args = parser_cli_arguments()
+    async def subscribe_node(self):
         handler = SubscriptionHandler()
         await asyncio.sleep(0.3)
 
         self.active_subscription = await self.client.create_subscription(500, handler)
-        node = self.client.get_node(node_id)
+        node = self.client.get_node(config.NODE_TO_READ)
         await self.active_subscription.subscribe_data_change(node)
-
-        if  not args.interactive:
-            await asyncio.Event().wait()
-        else:
-            try:
-                await asyncio.Event().wait()
-            except (asyncio.CancelledError, KeyboardInterrupt):
-                if args.verbose:
-                    print("\n[yellow]Node Subscription wird beendet[/yellow]")
-            finally:
-                if self.active_subscription:
-                    if args.verbose:
-                        print("Subscription Deleted")
-                    await self.active_subscription.delete()
-                    self.active_subscription = None

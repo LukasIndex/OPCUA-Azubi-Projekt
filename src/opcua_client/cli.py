@@ -16,15 +16,17 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschiene")
     parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' works somehow lol
     parser.add_argument("-n","--node", help='NODE angeben: "ns=X;i=Y"')
-    parser.add_argument("-m","--mode", choices=["read", "subscribe"], help="Modus: read oder subscribe auswählen (read is fallback)")
+    parser.add_argument("-m","--mode", choices=["read", "subscribe", "r", "s"], help="Modus: read oder subscribe auswählen (read is fallback)")
     args = parser.parse_args()
     return args
 
 def abfrage_server():  # 1. waits for OPC UA server adress and returnes it 
     while True:
         wert = input("Server Adresse eingeben: ").strip()
-        if wert:
+        if wert.startswith("opc.tcp://"):
             return wert
+        else:
+            raise ValueError("Ungülitger OPC UA Enpunkt")
         print("Eingabe darf nicht leer sein.")
 
 
