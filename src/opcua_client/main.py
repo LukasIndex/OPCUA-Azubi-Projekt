@@ -67,21 +67,23 @@ async def async_main():  # define async main function
                 print("Wert gelesen:")
             print(value)
 
-    async def await_subscription(X):
-        X = getattr(client, X)
-        subscription = await X()
+    async def await_subscription(XtoSubscribe):
+        SubscribeFunc = getattr(client, XtoSubscribe)
+        await SubscribeFunc()
         try:
             while True:
                 await asyncio.sleep(1)
         except (KeyboardInterrupt, asyncio.CancelledError):
             print("abbruch durch key")
-            if subscription:
+            if client.active_subscription:
                 try:
-                    await subscription.delete()
+                    await client.active_subscription.delete()
+                    client.active_subscription = None
                 except Exception:
                     pass
             if not args.interactive:
-                raise KeyboardInterrupt
+                print("raise key")
+                raise asyncio.CancelledError
 
 
     async def run_client():
@@ -109,7 +111,7 @@ async def async_main():  # define async main function
         while True:
             try:
                 await run_client()
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, asyncio.CancelledError):
                 if client.active_subscription:
                     try:
                         await client.active_subscription.delete()
@@ -146,20 +148,19 @@ async def async_main():  # define async main function
         else:
             await while_client()
 
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, asyncio.CancelledError):
         if args.verbose:
             print("Beendet durch Keyboard Interrupt")
-    except asyncio.CancelledError:
+    except Exception as e:
+        print("Fehler:", e)
+
+    finally:
         if client.active_subscription:
             try:
                 await client.active_subscription.delete()
                 client.active_subscription = None
             except Exception:
                 pass
-    except Exception as e:
-        print("Fehler:", e)
-
-    finally:
         try:
             await asyncio.wait_for(client.disconnect(), timeout=1.5)
         except Exception:
@@ -173,6 +174,7 @@ def main():  # main function calls async main function
     try:
         asyncio.run(async_main())
     except KeyboardInterrupt:
+        print("sys.Exit")
         sys.exit(0)
 
 if __name__ == "__main__":
