@@ -4,10 +4,10 @@ from asyncua import Client
 from rich import print  # Import rich print for colored cli output
 
 class SubscriptionHandler:
-    def datachange_notification(self, node, val, data):
+    def datachange_notification(self, _node, val, _data):
         print(f"{val}")
 
-class EventSubscriptionHandler:
+class EventSubscriptionHandler:  # handles events
     def event_notification(self, event):
         try:
             self.message = event.Message.Text if hasattr(event, "Message") else "Keine Nachricht"
@@ -24,7 +24,7 @@ class EventSubscriptionHandler:
             else:
                 color = "green"
 
-            print(f"[{color}]Event: {self.message} | Severity: {severity}[/{color}]")
+            print(f"[{color}]Event: {self.message} | Severity: {severity}[/{color}]")  # prints message in color of severity
         except Exception as e:
             print(f"[red]Fehler bei Events: {e}[/red]")            
 

@@ -13,9 +13,9 @@ async def async_main():  # define async main function
     args = parser_cli_arguments()  # calling the parser to use the cli arguments
 
     if not args.verbose:
-        logging.getLogger("asyncua").setLevel(logging.CRITICAL)
+        logging.getLogger("asyncua").setLevel(logging.CRITICAL)  # if --verbose is not set only log the critical stuff
     
-    if args.verbose:
+    if args.verbose:  # only prints if --verbose is set.
         print("Starte OPC UA Client")
 
     if args.server:
@@ -38,13 +38,13 @@ async def async_main():  # define async main function
     else:
         password = abfrage_password()
         
-    client = OpcUaClient(
+    client = OpcUaClient(  # gives the variable client the endpoint, username and password so it can be used later
         config.OPCUA_ENDPOINT,
         username=username,
         password=password
     )
 
-    async def node_client():
+    async def node_client():  # takes the node input and asks for read or subscribe
         if args.node:
             config.NODE_TO_READ = args.node
         else:
@@ -68,7 +68,7 @@ async def async_main():  # define async main function
                 print("Wert gelesen:")
             print(value)
 
-    async def await_subscription(XtoSubscribe):
+    async def await_subscription(XtoSubscribe):  # uniform function for subscription delete logic
         SubscribeFunc = getattr(client, XtoSubscribe)
         await SubscribeFunc()
 
@@ -85,15 +85,15 @@ async def async_main():  # define async main function
                 print("Subscription wird beendet")
             if client.active_subscription:
                 try:
-                    await client.active_subscription.delete()
+                    await client.active_subscription.delete()  # ends the subscription clean
                     client.active_subscription = None
                 except Exception:
                     pass
         if not args.interactive:
-            raise asyncio.CancelledError           
+            raise asyncio.CancelledError  # raises the error to the main function    
 
 
-    async def run_client():
+    async def run_client():  # start of the client
         if args.event:
             config.EVENT_NODE = args.event
             if args.verbose:
@@ -114,9 +114,9 @@ async def async_main():  # define async main function
         else:
             await node_client()
 
-    async def while_client():
+    async def while_client():  # runs if --interactive is set
         while True:
-            await run_client()
+            await run_client()  # loops the run_client for interactive mode 
 
             weiter = input("Nochmal abfragen? (y/N) oder neustarten (r): ").strip().lower()  # N in caps to visualize "pre select"
             if weiter == "r":
@@ -127,35 +127,35 @@ async def async_main():  # define async main function
                 args.mode = None
                 continue
 
-            if weiter != "y":
+            if weiter != "y":  # if anything else then "y" disconnect and break
                 await client.disconnect()
                 break
 
     try:
-        await client.connect()
+        await client.connect()  # waits for connection to the client with the defined endpoint etc.
         if args.verbose:
             if username != None:
                 print("Angemeldet als:", username)
             else:
-                print("Angemeldet als: Anonym")
+                print("Angemeldet als: Anonym")  # if no username is specified it counts as a anonymous login
 
         if args.identify:
             await client.machine_identifiers()  # calls a fuction for getting the machine identifiers
 
-        if not args.interactive:
+        if not args.interactive:  # not interactive = run client once 
             await run_client()
 
         else:
-            await while_client()
+            await while_client()  # interactive = loop the client
 
-    except (KeyboardInterrupt, asyncio.CancelledError):
+    except (KeyboardInterrupt, asyncio.CancelledError):  # if the programm gets interrupted via CTRL + C raise Keyboardinterrupt
         if args.verbose:
             print("Beendet durch Keyboard Interrupt")
             raise KeyboardInterrupt
     except Exception as e:
         print("Fehler:", e)
 
-    finally:
+    finally:  # at last if a subscription is active try to end it and disconnect from server
         if client.active_subscription:
             try:
                 await client.active_subscription.delete()
@@ -163,7 +163,7 @@ async def async_main():  # define async main function
             except Exception:
                 pass
         try:
-            await asyncio.wait_for(client.disconnect(), timeout=1.5)
+            await asyncio.wait_for(client.disconnect(), timeout=1.5)  # waits a bit for clean disconnect
         except Exception:
             pass
 
@@ -174,8 +174,7 @@ async def async_main():  # define async main function
 def main():  # main function calls async main function
     try:
         asyncio.run(async_main())
-    except KeyboardInterrupt:
-        print("sys.Exit")
+    except KeyboardInterrupt:  # exit the programm when CTRL + C is pressed
         sys.exit(0)
 
 if __name__ == "__main__":

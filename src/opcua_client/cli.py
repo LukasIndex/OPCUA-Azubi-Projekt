@@ -1,5 +1,12 @@
+import sys
+import signal
 import getpass
 import argparse
+
+def _signal_handler(_sig, _frame):  # catches CTRL + C global for clean exit
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, _signal_handler)
 
 
 def parser_cli_arguments():  # defines parser cli arguments for the OPC UA client
@@ -14,7 +21,7 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-v","--verbose", action="store_true", help="Großzügige ausgabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
     parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschiene")
-    parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' works somehow lol
+    parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' so it shows in the --help output
     parser.add_argument("-n","--node", help='NODE angeben: "ns=X;i=Y"')
     parser.add_argument("-m","--mode", choices=["read", "subscribe", "r", "s"], help="Modus: read oder subscribe auswählen (read is fallback)")
     args = parser.parse_args()
@@ -23,11 +30,12 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
 def abfrage_server():  # 1. waits for OPC UA server adress and returnes it 
     while True:
         wert = input("Server Adresse eingeben: ").strip()
-        if wert.startswith("opc.tcp://"):
+        if wert == "":
+            print("Eingabe darf nicht leer sein.")
+        elif wert.startswith("opc.tcp://"):  # small validation so random nonesense trows an error
             return wert
         else:
-            raise ValueError("Ungülitger OPC UA Enpunkt")
-        print("Eingabe darf nicht leer sein.")
+            print("Ungülitger OPC UA Enpunkt")
 
 
 def abfrage_uname():  # 2. waits for username input and returnes it
