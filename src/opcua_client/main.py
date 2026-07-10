@@ -1,5 +1,6 @@
 import sys
 import logging
+import getpass
 import asyncio
 import opcua_client.config as config
 from rich import print
@@ -70,20 +71,26 @@ async def async_main():  # define async main function
     async def await_subscription(XtoSubscribe):
         SubscribeFunc = getattr(client, XtoSubscribe)
         await SubscribeFunc()
+
+        async def wait_for_enter():
+             print("Subscription aktiv, Enter drücken zum beenden")
+             await asyncio.to_thread(getpass.getpass,prompt = "")
+
         try:
-            while True:
-                await asyncio.sleep(1)
+            await wait_for_enter()
         except (KeyboardInterrupt, asyncio.CancelledError):
-            print("abbruch durch key")
+            raise KeyboardInterrupt
+        finally:
+            if args.verbose:
+                print("Subscription wird beendet")
             if client.active_subscription:
                 try:
                     await client.active_subscription.delete()
                     client.active_subscription = None
                 except Exception:
                     pass
-            if not args.interactive:
-                print("raise key")
-                raise asyncio.CancelledError
+        if not args.interactive:
+            raise asyncio.CancelledError           
 
 
     async def run_client():
@@ -109,15 +116,8 @@ async def async_main():  # define async main function
 
     async def while_client():
         while True:
-            try:
-                await run_client()
-            except (KeyboardInterrupt, asyncio.CancelledError):
-                if client.active_subscription:
-                    try:
-                        await client.active_subscription.delete()
-                        client.active_subscription = None
-                    except Exception:
-                        pass
+            await run_client()
+
             weiter = input("Nochmal abfragen? (y/N) oder neustarten (r): ").strip().lower()  # N in caps to visualize "pre select"
             if weiter == "r":
                 args.event = None
@@ -151,6 +151,7 @@ async def async_main():  # define async main function
     except (KeyboardInterrupt, asyncio.CancelledError):
         if args.verbose:
             print("Beendet durch Keyboard Interrupt")
+            raise KeyboardInterrupt
     except Exception as e:
         print("Fehler:", e)
 
