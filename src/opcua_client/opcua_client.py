@@ -50,13 +50,11 @@ class OpcUaClient:  # sets the endpoint, sets the username and password and sets
         node = self.client.get_node(node_id)
         return await node.read_value()
 
-    async def machine_identifiers(self): # WONT WORK ON REAL SERVER, reads the nodes specified in config.py
+    async def machine_identifiers(self): # Empty function for future machine identification
         try:
-            machine_name = await self.read_node(config.MACHINE_ID)
-            build_number = await self.read_node(config.BUILD_NUMBER)
-            print(f"[blue]Maschinen Bezeichnung: {machine_name}, Buildnummer: {build_number} [/blue]")
+            pass
         except Exception as e:
-            print(f"Maschinen Identifizierungen nicht lesbar: {e}")
+            pass
 
     async def subscribe_events(self):  # creates event subscription and uses the handler
         handler = EventSubscriptionHandler()
