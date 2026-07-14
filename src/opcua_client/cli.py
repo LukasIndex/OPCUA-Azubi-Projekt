@@ -20,6 +20,8 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-p","--password", help="Password eingabe")
     parser.add_argument("-v","--verbose", action="store_true", help="Großzügige ausgabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
+    parser.add_argument("-b", "--browse", action="store_true", help="Zeigt alle sichtbaren Nodes des Servers")
+    parser.add_argument("-Dx", "--diagnostics", action="store_true", help="Zeigt Server Diagnosedaten an")
     parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschiene (Noch nicht Implementiert)")  # not implemented yet
     parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' so it shows in the --help output
     parser.add_argument("-n","--node", help='NODE angeben: "ns=X;i=Y"')

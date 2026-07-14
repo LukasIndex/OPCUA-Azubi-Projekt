@@ -46,15 +46,43 @@ class OpcUaClient:  # sets the endpoint, sets the username and password and sets
     async def disconnect(self):  # disconnect from the server
         await self.client.disconnect()
 
+    async def show_nodes(self, node=None, indent=0):  # prints every node that the server has
+        if node == None:
+            node = self.client.nodes.root
+
+        print(" " * indent + f"-{await node.read_display_name()} ({node.nodeid})")
+
+        children = await node.get_children()
+        for child in children:
+            await self.show_nodes(child, indent + 4)
+
     async def read_node(self, node_id: str):  # function that reads the specified node from the server
         node = self.client.get_node(node_id)
         return await node.read_value()
 
-    async def machine_identifiers(self): # Empty function for future machine identification
+    async def machine_identifiers(self): # reads standart nodes for identification
         try:
-            pass
-        except Exception as e:
-            pass
+            name_node = self.client.get_node("ns=0;i=2261")
+            vendor_node = self.client.get_node("ns=0;i=2259")
+
+            product_name = await name_node.read_value()
+            vendor_name = await vendor_node.read_value()
+
+            if hasattr(product_name, "Text"): product_name = product_name.Text
+            if hasattr(vendor_name, "Text"): vendor_name = vendor_name.Text
+
+            print(f"Produktname: {product_name}, Hersteller: {vendor_name}")
+        except Exception:
+            print("Es konnten keine Identifizierungswerte ausgelesen werden")
+
+    async def server_diagnostics(self):  # reads the server status and prints it
+        try:
+            status_node = self.client.get_node("ns=0;i=2256")
+            server_status = await status_node.read_value()
+            if hasattr(server_status, "Text"): server_status = server_status.Text
+            print(server_status)
+        except Exception:
+            print("Es konnten keine Diagnosedaten ausgelesen werden")
 
     async def subscribe_events(self):  # creates event subscription and uses the handler
         handler = EventSubscriptionHandler()

@@ -139,6 +139,12 @@ async def async_main():  # define async main function
             else:
                 print("Angemeldet als: Anonym")  # if no username is specified it counts as a anonymous login
 
+        if args.browse:
+            await client.show_nodes()
+
+        if args.diagnostics:
+            await client.server_diagnostics()
+
         if args.identify:
             await client.machine_identifiers()  # calls a fuction for getting the machine identifiers
 
