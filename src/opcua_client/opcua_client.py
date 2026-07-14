@@ -63,15 +63,10 @@ class OpcUaClient:  # sets the endpoint, sets the username and password and sets
     async def machine_identifiers(self): # reads standart nodes for identification
         try:
             name_node = self.client.get_node("ns=0;i=2261")
-            vendor_node = self.client.get_node("ns=0;i=2259")
-
             product_name = await name_node.read_value()
-            vendor_name = await vendor_node.read_value()
-
             if hasattr(product_name, "Text"): product_name = product_name.Text
-            if hasattr(vendor_name, "Text"): vendor_name = vendor_name.Text
 
-            print(f"Produktname: {product_name}, Hersteller: {vendor_name}")
+            print(f"Produktname: {product_name}")
         except Exception:
             print("Es konnten keine Identifizierungswerte ausgelesen werden")
 
