@@ -18,6 +18,7 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-s","--server", help="OPC UA Endpoint eingabe")
     parser.add_argument("-u","--username", help="Username eingabe")
     parser.add_argument("-p","--password", help="Password eingabe")
+    parser.add_argument("-a", "--anonym", action="store_true", help="Für Anonymen Login, überspringt username und passwort abfrage")
     parser.add_argument("-v","--verbose", action="store_true", help="Großzügige ausgabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
     parser.add_argument("-b", "--browse", action="store_true", help="Zeigt alle sichtbaren Nodes des Servers, USE WITH CARE! has a big output")
@@ -43,11 +44,15 @@ def abfrage_server():  # 1. waits for OPC UA server adress and returnes it
 def abfrage_uname():  # 2. waits for username input and returnes it
     while True:
         wert = input("Benutzername eingeben: ").strip()
+        if wert == "":
+            wert = None
         return wert 
     
 def abfrage_password():  # waits for password input and returnes it
     while True:
         wert = getpass.getpass("Gib dein Passwort ein: ")  # getpass hides password while typing
+        if wert == "":
+            wert = None
         return wert
     
 def abfrage_event():  # 3. waits for event node input and returnes it

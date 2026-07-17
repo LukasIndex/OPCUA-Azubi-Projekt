@@ -26,17 +26,18 @@ async def async_main():  # define async main function
     if args.verbose:
         print("Endpoint:", config.OPCUA_ENDPOINT)  # prints the server adress of the opcua endpoint
 
-   
-    if args.username:
-        username = args.username
+    if args.anonym:
+        username = None
+        password = None
     else:
-        username = abfrage_uname()
-
-  
-    if args.password:
-        password = args.password
-    else:
-        password = abfrage_password()
+        if args.username:
+            username = args.username
+        else:
+            username = abfrage_uname()
+        if args.password:
+            password = args.password
+        else:
+            password = abfrage_password()
         
     client = OpcUaClient(  # gives the variable client the endpoint, username and password so it can be used later
         config.OPCUA_ENDPOINT,
