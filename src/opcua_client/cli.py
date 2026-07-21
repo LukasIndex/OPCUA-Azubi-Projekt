@@ -19,50 +19,50 @@ def parser_cli_arguments():  # defines parser cli arguments for the OPC UA clien
     parser.add_argument("-u","--username", help="Username eingabe")
     parser.add_argument("-p","--password", help="Password eingabe")
     parser.add_argument("-a", "--anonym", action="store_true", help="Für Anonymen Login, überspringt username und passwort abfrage")
-    parser.add_argument("-v","--verbose", action="store_true", help="Großzügige ausgabe")
+    parser.add_argument("-v","--verbose", action="store_true", help="Großzügige Ausgabe")
     parser.add_argument("-i","--interactive", action="store_true", help="Aktiviert interaktiven Modus mit Eingabeaufforderungen")
     parser.add_argument("-b", "--browse", action="store_true", help="Zeigt alle sichtbaren Nodes des Servers, USE WITH CARE! has a big output")
     parser.add_argument("-Dx", "--diagnostics", action="store_true", help="Zeigt Server Diagnosedaten an")
-    parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschiene (Noch nicht Implementiert)")  # not implemented yet
+    parser.add_argument("-ID","--identify", action="store_true", help="Identifizierung der Maschine (Noch nicht Implementiert)")  # not implemented yet
     parser.add_argument("-e","--event", help='EVENT Node angeben: "ns=X;i=Y"')  # "" inside '' so it shows in the --help output
     parser.add_argument("-n","--node", help='NODE angeben: "ns=X;i=Y"')
     parser.add_argument("-m","--mode", choices=["read", "subscribe", "r", "s"], help="Modus: read oder subscribe auswählen (read is fallback)")
     args = parser.parse_args()
     return args
 
-def abfrage_server():  # 1. waits for OPC UA server adress and returnes it 
+def abfrage_server():  # 1. waits for OPC UA server address and returns it 
     while True:
         wert = input("Server Adresse eingeben: ").strip()
         if wert == "":
             print("Eingabe darf nicht leer sein.")
-        elif wert.startswith("opc.tcp://"):  # small validation so random nonesense trows an error
+        elif wert.startswith("opc.tcp://"):  # small validation so random nonsense trows an error
             return wert
         else:
-            print("Ungülitger OPC UA Enpunkt")
+            print("Ungültiger OPC UA Endpunkt")
 
 
-def abfrage_uname():  # 2. waits for username input and returnes it
+def abfrage_uname():  # 2. waits for username input and returns it
     while True:
         wert = input("Benutzername eingeben: ").strip()
         if wert == "":
             wert = None
         return wert 
     
-def abfrage_password():  # waits for password input and returnes it
+def abfrage_password():  # 3. waits for password input and returns it
     while True:
         wert = getpass.getpass("Gib dein Passwort ein: ")  # getpass hides password while typing
         if wert == "":
             wert = None
         return wert
     
-def abfrage_event():  # 3. waits for event node input and returnes it
+def abfrage_event():  # 4. waits for event node input and returns it
     while True:
         event = input("Event Node eingeben: ").strip()
         if event:
             return event
         print("Eingabe darf nicht leer sein.")   
         
-def abfrage_wert():  # 4. waits for node input from user and returnes it
+def abfrage_wert():  # 5. waits for node input from user and returns it
     while True:
         wert = input("Abfrage Wert eingeben: ").strip()
         if wert:

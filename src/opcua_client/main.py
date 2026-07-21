@@ -24,7 +24,7 @@ async def async_main():  # define async main function
         config.OPCUA_ENDPOINT = abfrage_server()
 
     if args.verbose:
-        print("Endpoint:", config.OPCUA_ENDPOINT)  # prints the server adress of the opcua endpoint
+        print("Endpoint:", config.OPCUA_ENDPOINT)  # prints the server address of the opcua endpoint
 
     if args.anonym:
         username = None
@@ -147,7 +147,7 @@ async def async_main():  # define async main function
             await client.server_diagnostics()
 
         if args.identify:
-            await client.machine_identifiers()  # calls a fuction for getting the machine identifiers
+            await client.machine_identifiers()  # calls a function for getting the machine identifiers
 
         if not args.interactive:  # not interactive = run client once 
             await run_client()
@@ -155,7 +155,7 @@ async def async_main():  # define async main function
         else:
             await while_client()  # interactive = loop the client
 
-    except (KeyboardInterrupt, asyncio.CancelledError):  # if the programm gets interrupted via CTRL + C raise Keyboardinterrupt
+    except (KeyboardInterrupt, asyncio.CancelledError):  # if the program gets interrupted via CTRL + C raise KeyboardInterrupt
         if args.verbose:
             print("Beendet durch Keyboard Interrupt")
             raise KeyboardInterrupt
@@ -181,7 +181,7 @@ async def async_main():  # define async main function
 def main():  # main function calls async main function
     try:
         asyncio.run(async_main())
-    except KeyboardInterrupt:  # exit the programm when CTRL + C is pressed
+    except KeyboardInterrupt:  # exit the program when CTRL + C is pressed
         sys.exit(0)
 
 if __name__ == "__main__":

@@ -68,7 +68,7 @@ class OpcUaClient:  # sets the endpoint, sets the username and password and sets
 
             print(f"Produktname: {product_name}")
         except Exception:
-            print("Es konnten keine Identifizierungswerte ausgelesen werden")
+            print("Es konnten keine Identifizierung Werte ausgelesen werden")
 
     async def server_diagnostics(self):  # reads the server status and prints it
         try:
